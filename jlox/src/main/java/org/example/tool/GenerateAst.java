@@ -1,0 +1,103 @@
+package org.example.tool;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+public class GenerateAst {
+    public static void main(String[] args) throws IOException {
+        if (args.length != 1) {
+            System.err.println("Usage: generate_ast <output directory>");
+            System.exit(64);
+        }
+        String outputDir = args[0];
+        defineAst(outputDir, "Expr", Arrays.asList(
+                "Binary   : Expr left, Token operator, Expr right",
+                "Grouping : Expr expression",
+                "Literal  : Object value",
+                "Unary    : Token operator, Expr right"
+        ));
+    }
+
+    private static void defineAst(String outputDir, String baseName, List<String> types) throws IOException {
+
+        String path = outputDir + "/" + baseName + ".java";
+
+        try (PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8)) {
+            writer.println("package org.example.lox;");
+            writer.println();
+            writer.println("import java.util.List;");
+            writer.println();
+            writer.println("abstract class %s {".formatted(baseName));
+
+            defineVisitor(writer, baseName, types);
+
+            for (String type : types) {
+                String className = type.split(":")[0].trim();
+                String fields = type.split(":")[1].trim();
+
+                defineType(writer, baseName, className, fields);
+            }
+
+            writer.println();
+            writer.println("    abstract <R> R accept(Visitor<R> visitor);");
+
+            writer.println("}");
+        }
+
+    }
+
+    private static void defineVisitor(PrintWriter writer, String baseName, List<String> types) {
+
+        writer.println("    interface Visitor<R> {");
+        for (String type : types) {
+            String typeName = type.split(":")[0].trim();
+            writer.println("        R visit%s%s(%s %s);".formatted(
+                    typeName,
+                    baseName,
+                    typeName,
+                    baseName.toLowerCase()));
+        }
+        writer.println("    }");
+
+    }
+
+
+    private static void defineType(
+            PrintWriter writer, String baseName,
+            String className, String fieldList) {
+        writer.println("    static class %s extends %s {".formatted(className, baseName));
+
+        writer.println("        %s(%s) {".formatted(className, fieldList));
+
+        String[] fields = fieldList.split(", ");
+        for (String field : fields) {
+            String name = field.split(" ")[1].trim();
+            writer.println("            this.%s = %s;".formatted(name, name));
+        }
+        writer.println("        }");
+
+        writer.println();
+        writer.println("        @Override");
+        writer.println("        <R> R accept(Visitor<R> visitor) {");
+        writer.println("            return visitor.visit%s%s(this);".formatted(
+                className,
+                baseName));
+        writer.println("        }");
+
+        //Fields
+        writer.println();
+        for (String field : fields) {
+            writer.println("        final %s;".formatted(field));
+        }
+
+        writer.println("    }");
+    }
+
+
+}
