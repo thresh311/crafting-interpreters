@@ -1,4 +1,4 @@
-package org.example;
+package org.example.lox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Character.isDigit;
-import static org.example.TokenType.*;
+import static org.example.lox.TokenType.*;
 
 public class Scanner {
     private static final Map<String, TokenType> keywords;
