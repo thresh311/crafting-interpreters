@@ -13,22 +13,22 @@ public class Scanner {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("and",    AND);
-        keywords.put("class",  CLASS);
-        keywords.put("else",   ELSE);
-        keywords.put("false",  FALSE);
-        keywords.put("for",    FOR);
-        keywords.put("fun",    FUN);
-        keywords.put("if",     IF);
-        keywords.put("nil",    NIL);
-        keywords.put("or",     OR);
-        keywords.put("print",  PRINT);
+        keywords.put("and", AND);
+        keywords.put("class", CLASS);
+        keywords.put("else", ELSE);
+        keywords.put("false", FALSE);
+        keywords.put("for", FOR);
+        keywords.put("fun", FUN);
+        keywords.put("if", IF);
+        keywords.put("nil", NIL);
+        keywords.put("or", OR);
+        keywords.put("print", PRINT);
         keywords.put("return", RETURN);
-        keywords.put("super",  SUPER);
-        keywords.put("this",   THIS);
-        keywords.put("true",   TRUE);
-        keywords.put("var",    VAR);
-        keywords.put("while",  WHILE);
+        keywords.put("super", SUPER);
+        keywords.put("this", THIS);
+        keywords.put("true", TRUE);
+        keywords.put("var", VAR);
+        keywords.put("while", WHILE);
     }
 
     private final String source;
@@ -69,6 +69,8 @@ public class Scanner {
             case '/' -> {
                 if (match('/')) {
                     while (peek() != '\n' && !isAtEnd()) advance();
+                } else if (match('*')) {
+                    multilineComment();
                 } else {
                     addToken(SLASH);
                 }
@@ -93,10 +95,32 @@ public class Scanner {
         }
     }
 
+    private void multilineComment() {
+
+        int nestingLevel = 0;
+        while (!(peek() == '*' && peekNext() == '/' && nestingLevel == 0) && !isAtEnd()) {
+            if (peek() == '\n') line++;
+            char lastChar = advance();
+            if (lastChar == '/' && match('*')) {
+                nestingLevel++;
+            } else if (lastChar == '*' && match('/')) {
+                nestingLevel--;
+            }
+        }
+
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated block comment");
+            return;
+        }
+
+        advance();
+        advance();
+    }
+
     private void identifier() {
         while (isAlphaNumeric(peek())) advance();
 
-        String lexeme =  source.substring(start, current);
+        String lexeme = source.substring(start, current);
         addToken(keywords.getOrDefault(lexeme, IDENTIFIER));
     }
 
