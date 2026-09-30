@@ -8,6 +8,10 @@ public class AstRPNPrinter implements Expr.Visitor<String> {
         return expr.accept(this);
     }
 
+    public String visitTernaryExpr(Expr.Ternary expr) {
+        return postfix(expr.firstOperator.lexeme, expr.left, expr.middle, expr.right);
+    }
+
     @Override
     public String visitBinaryExpr(Expr.Binary expr) {
         return postfix(expr.operator.lexeme, expr.left, expr.right);
