@@ -55,3 +55,70 @@ Examples:
 token.lexeme.toString()
 math.sqrt(2,3)
 
+## Chapter 6 - Parsing expressions
+
+### Challenges 
+1 - Add support for C like comma expressions. Give them the same precedence and associativity as in C. Write the grammar, and then implement the necessary parsing code.
+
+The comma has the lowest precedence and its left associative (left-to-right).
+
+2 - Likewise, add support for the C-style conditional or “ternary” operator ?:. What precedence level is allowed between the ? and :? Is the whole operator left-associative or right-associative?
+
+Reference: https://en.cppreference.com/c/language/operator_precedence
+
+The expression in the middle of the conditional operator (between ? and :) is parsed as if parenthesized: its precedence relative to ?: is ignored. 
+
+The whole operator is right associative. The **operator associativity** is simply the way to **group operators with the same precedence** and **doesn't affect order of evaluation** in any way.
+
+New grammar:
+```
+expression     → comma ;
+
+comma -> coma "," ternary-conditional | ternary-conditional;
+comma -> ternary-conditional ("," ternary-conditional)*;
+
+ternary-conditional -> equality "?" expression ":" ternary-conditional | equality;
+ternary-conditional -> (equality "?" expression ":")* equality;
+
+equality       → equality comparison | comparison ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+
+comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           → factor ( ( "-" | "+" ) factor )* ;
+factor         → unary ( ( "/" | "*" ) unary )* ;
+unary          → ( "!" | "-" ) unary
+| primary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil"
+| "(" expression ")" ;
+
+```
+3 - Add error productions to handle each binary operator appearing without a left-hand operand. In other words, detect a binary operator appearing at the beginning of an expression. Report that as an error, but also parse and discard a right-hand operand with the appropriate precedence.
+New grammar:
+```
+expression     → comma ;
+
+comma -> coma "," ternary-conditional | ternary-conditional;
+comma -> ternary-conditional ("," ternary-conditional)*;
+
+ternary-conditional -> equality "?" expression ":" ternary-conditional | equality;
+ternary-conditional -> (equality "?" expression ":")* equality;
+
+equality       → equality comparison | comparison ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+
+comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           → factor ( ( "-" | "+" ) factor )* ;
+factor         → unary ( ( "/" | "*" ) unary )* ;
+unary          → ( "!" | "-" ) unary
+| error_prod
+| primary ;
+unary -> ("!" | "-")* (primary | error_prod) 
+error_prod     ::= "," ternary
+                 | ( "!=" | "==" ) comparison
+                 | ( ">" | ">=" | "<" | "<=" ) term
+                 | ( "-" | "+" ) factor
+                 | ( "/" | "*" ) unary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil"
+| "(" expression ")" ;
+
+```
