@@ -110,6 +110,41 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
+        if(match(COMMA)) {
+            Token operator = previous();
+            error(operator, "Missing left operand for operator '%s'".formatted(operator.lexeme));
+            ternaryConditional();
+            return unary();
+        }
+
+        if(match(BANG_EQUAL, EQUAL_EQUAL)) {
+            Token operator = previous();
+            error(operator, "Missing left operand for operator '%s'".formatted(operator.lexeme));
+            comparison();
+            return unary();
+        }
+
+        if(match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+            Token operator = previous();
+            error(operator, "Missing left operand for operator '%s'".formatted(operator.lexeme));
+            term();
+            return unary();
+        }
+
+        if(match(PLUS, MINUS)) {
+            Token operator = previous();
+            error(operator, "Missing left operand for operator '%s'".formatted(operator.lexeme));
+            factor();
+            return unary();
+        }
+
+        if(match(STAR, SLASH)) {
+            Token operator = previous();
+            error(operator, "Missing left operand for operator '%s'".formatted(operator.lexeme));
+            unary();
+            return unary();
+        }
+
         return primary();
     }
 
@@ -128,7 +163,7 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
-        throw error(peek(), "Expect expression.");
+           throw error(peek(), "Expect expression.");
     }
 
     private boolean match(TokenType... types) {
