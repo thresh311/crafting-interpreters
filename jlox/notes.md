@@ -130,8 +130,14 @@ Up to this point, all errors that we had encountered where syntax or static erro
 
 REPL (read-eval-print-loo): an interactive language shell. It takes single user inputs, executes them and returns the result to the user.
 
-### Semantic choices:
+### Semantic choices
 - The subexpressions in a binary expression are evaluated from left to right.
 - In the case of a binary expression, we evaluate both operands before checking the type of _either_.
   - We could have specified that the left operand is checked before even evaluating the right one.
-- 
+
+### Challenges
+1 - Allowing comparisons on types other than numbers could be useful. The operators might have a reasonable interpretation for strings. Even comparisons among mixed types, like 3 < "pancake" could be handy to enable things like ordered collections of heterogeneous types. Or it could simply lead to bugs and confusion.
+
+Would you extend Lox to support comparing other types? If so, which pairs of types do you allow and how do you define their ordering? Justify your choices and compare them to other languages.
+
+(reference: https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.20)
