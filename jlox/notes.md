@@ -122,3 +122,16 @@ primary        → NUMBER | STRING | "true" | "false" | "nil"
 | "(" expression ")" ;
 
 ```
+## Chapter 7 - Evaluating expressions
+
+Up to this point, all errors that we had encountered where syntax or static errors. Those are detected and reported before any code is executed. _Runtime errors_ are failures that the language semantics demand we detect and report while the program is running.
+
+- "We could print a runtime error and then abort the process and exit the application entirely. **That has a certain melodramatic flair. Sort of the programming language interpreter equivalent of a mic drop.**"
+
+REPL (read-eval-print-loo): an interactive language shell. It takes single user inputs, executes them and returns the result to the user.
+
+### Semantic choices:
+- The subexpressions in a binary expression are evaluated from left to right.
+- In the case of a binary expression, we evaluate both operands before checking the type of _either_.
+  - We could have specified that the left operand is checked before even evaluating the right one.
+- 
