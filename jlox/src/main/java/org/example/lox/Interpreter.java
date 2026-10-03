@@ -68,8 +68,8 @@ public class Interpreter implements Expr.Visitor<Object> {
                 if (left instanceof Double l && right instanceof Double r) {
                     return l + r;
                 }
-                if (left instanceof String l && right instanceof String r) {
-                    return l + r;
+                if (left instanceof String || right instanceof String) {
+                    return stringify(left) + stringify(right);
                 }
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             }
