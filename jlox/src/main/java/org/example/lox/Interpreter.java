@@ -16,11 +16,20 @@ public class Interpreter implements Expr.Visitor<Object> {
     }
 
     @Override
+    public Object visitTernaryExpr(Expr.Ternary expr) {
+        Object left = evaluate(expr.left);
+        return isTruthy(left)? evaluate(expr.middle) : evaluate(expr.right);
+    }
+
+    @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
         Object left = evaluate(expr.left);
         Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
+            case COMMA -> {
+                return right;
+            }
             case GREATER -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left > (double) right;
