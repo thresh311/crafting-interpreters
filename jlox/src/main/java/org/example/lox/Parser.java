@@ -1,5 +1,6 @@
 package org.example.lox;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,7 +8,8 @@ import static org.example.lox.TokenType.*;
 
 public class Parser {
 
-    private static class ParseError extends RuntimeException {}
+    private static class ParseError extends RuntimeException {
+    }
 
     private final List<Token> tokens;
     private int current = 0;
@@ -16,14 +18,33 @@ public class Parser {
         this.tokens = tokens;
     }
 
-    Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+    List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+        return statements;
     }
 
+    private Stmt statement() {
+        if (match(PRINT)) {
+            return printStatement();
+        }
+
+        return expressionStatement();
+    }
+
+    private Stmt expressionStatement() {
+        Expr expression = expression();
+        consume(SEMICOLON, "Expect ';' after expression");
+        return new Stmt.Expression(expression);
+    }
+
+    private Stmt printStatement() {
+        Expr expression = expression();
+        consume(SEMICOLON, "Expect ';' after value");
+        return new Stmt.Print(expression);
+    }
 
     private Expr expression() {
         return equality();
@@ -33,7 +54,7 @@ public class Parser {
         Expr expr = comparison();
 
         while (match(BANG_EQUAL, EQUAL_EQUAL)) {
-            Token operator  = previous();
+            Token operator = previous();
             Expr right = comparison();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -45,7 +66,7 @@ public class Parser {
         Expr expr = term();
 
         while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
-            Token operator  = previous();
+            Token operator = previous();
             Expr right = term();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -57,7 +78,7 @@ public class Parser {
         Expr expr = factor();
 
         while (match(PLUS, MINUS)) {
-            Token operator  = previous();
+            Token operator = previous();
             Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -69,7 +90,7 @@ public class Parser {
         Expr expr = unary();
 
         while (match(STAR, SLASH)) {
-            Token operator  = previous();
+            Token operator = previous();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -78,7 +99,7 @@ public class Parser {
     }
 
     private Expr unary() {
-        if(match(BANG, MINUS)) {
+        if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
@@ -96,7 +117,7 @@ public class Parser {
             return new Expr.Literal(previous().literal);
         }
 
-        if(match(LEFT_PAREN)) {
+        if (match(LEFT_PAREN)) {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression");
             return new Expr.Grouping(expr);

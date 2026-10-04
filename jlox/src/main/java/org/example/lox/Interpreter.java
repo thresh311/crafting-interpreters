@@ -1,11 +1,15 @@
 package org.example.lox;
 
-public class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
 
-    void interpret(Expr expr) {
+public class Interpreter implements Expr.Visitor<Object>,
+        Stmt.Visitor<Void> {
+
+    void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expr);
-            System.out.println(stringify(value));
+            for(Stmt statement : statements) {
+             execute(statement);
+            }
         } catch (RuntimeError error) {
             Lox.runtimeError(error);
         }
@@ -13,6 +17,22 @@ public class Interpreter implements Expr.Visitor<Object> {
 
     Object evaluate(Expr expr) {
         return expr.accept(this);
+    }
+
+    void execute(Stmt stmt) {
+        stmt.accept(this);
+    }
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        this.evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        System.out.println(stringify(this.evaluate(stmt.expression)));
+        return null;
     }
 
     @Override
