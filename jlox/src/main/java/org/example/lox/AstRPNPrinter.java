@@ -38,6 +38,11 @@ public class AstRPNPrinter implements Expr.Visitor<String> {
         return postfix(op, expr.right);
     }
 
+    @Override
+    public String visitVariableExpr(Expr.Variable expr) {
+        return expr.name.lexeme;
+    }
+
     private String postfix(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
 
