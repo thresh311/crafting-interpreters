@@ -9,6 +9,8 @@ public class Environment {
     final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>();
     private final Set<String> declaredVariables = new HashSet<>();
+    //Could also be implement using a flag Object
+//    private final Object UNINITIALIZED = new Object();
 
     public Environment() {
         enclosing = null;
