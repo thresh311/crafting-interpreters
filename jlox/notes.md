@@ -265,3 +265,19 @@ The way we implement scopes it through **environments**. As the interpreter walk
   - In the case of variables that are declared in an enclosing scope and not _shadowed_, we need to chain the environments together. When we look up a variable, we walk the chain from the innermost to the outermost environment until we find it. 
 
 **Shadowing:** When a local variable has the same name as a variable in an enclosing scope, the code inside the block looses access to the outer variable. 
+
+### Challenges
+
+What does the following program do? It prints 3. 
+```
+var a = 1;
+{
+var a = a + 2;
+print a; 
+}
+```
+What did you expect it to do? Is it what you think it should do? What does analogous code in other languages you are familiar with do? What do you think users will expect this to do?
+
+- I expected it to print 3. This happens because the initializer expression is evaluated, before declaring 'a' in the inner scope.
+- In Java, this produces an error because the left-hand operand gets evaluated first to produce a variable, which shadows the one in the outer scope, and then right-hand operand is evaluated. (Reference: https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.26)
+- In C, the program prints an unpredictable garbage value. The identifier enters scope immediately after its complete declarator, before its initializer is evaluated.
