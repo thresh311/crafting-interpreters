@@ -52,6 +52,17 @@ public class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         System.out.println(stringify(this.evaluate(stmt.expression)));
         return null;
@@ -60,7 +71,7 @@ public class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
         Object value = null;
-        if(stmt.initializer != null) {
+        if (stmt.initializer != null) {
             value = evaluate(stmt.initializer);
         }
         environment.define(stmt.name.lexeme, value);
