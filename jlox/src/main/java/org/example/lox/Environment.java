@@ -1,12 +1,14 @@
 package org.example.lox;
 
-import java.awt.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Environment {
     final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>();
+    private final Set<String> declaredVariables = new HashSet<>();
 
     public Environment() {
         enclosing = null;
@@ -17,8 +19,13 @@ public class Environment {
     }
 
     Object get(Token name) {
-        if (values.containsKey(name.lexeme)) {
-            return values.get(name.lexeme);
+        if(declaredVariables.contains(name.lexeme)) {
+            if (values.containsKey(name.lexeme)) {
+                return values.get(name.lexeme);
+            }
+
+            throw new RuntimeError(name,
+                    "The variable hasn't been initialized nor assigned to '" + name.lexeme + "'.");
         }
 
         if(enclosing != null) {
@@ -29,12 +36,18 @@ public class Environment {
                 "Undefined variable '" + name.lexeme + "'.");
     }
 
+    void define(String name) {
+        declaredVariables.add(name);
+        values.remove(name); // When redeclaring a variable without an initial value inside a scope, we mark it as uninitialized again
+    }
+
     void define(String name, Object value) {
+        declaredVariables.add(name);
         values.put(name, value);
     }
 
     void assign(Token name, Object value) {
-        if (values.containsKey(name.lexeme)) {
+        if (declaredVariables.contains(name.lexeme)) {
             values.put(name.lexeme, value);
             return;
         }
