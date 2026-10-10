@@ -43,6 +43,19 @@ public class AstRPNPrinter implements Expr.Visitor<String> {
         return expr.name.lexeme;
     }
 
+    @Override
+    public String visitAssignExpr(Expr.Assign expr) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(expr.name.lexeme)
+                .append(" ")
+                .append(expr.value.accept(this))
+                .append(" ")
+                .append("=");
+
+        return builder.toString();
+    }
+
     private String postfix(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
 
