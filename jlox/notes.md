@@ -265,3 +265,67 @@ The way we implement scopes it through **environments**. As the interpreter walk
   - In the case of variables that are declared in an enclosing scope and not _shadowed_, we need to chain the environments together. When we look up a variable, we walk the chain from the innermost to the outermost environment until we find it. 
 
 **Shadowing:** When a local variable has the same name as a variable in an enclosing scope, the code inside the block looses access to the outer variable. 
+
+## Chapter 9 - Control flow
+
+### Conditional execution
+
+We can divide control flow roughly into two kinds:
+1. Conditional or branching control flow
+   - Since else clauses are optional, and there no explicit delimiter marking the end of an if statement, the grammar is ambiguous when you nest ifs that don't have block statements as branches. This problem is known as the _dangling else_ problem. It is possible to define a context-free grammar to avoid this ambiguity, but it requires adding more statement rules. Instead, most languages use an ad hoc to avoid this problem: _the else is bound to the nearest if that precedes it_. 
+2. Looping control flow: Lox features two looping control flow statements, while and for.
+
+New Lox grammar:
+```
+statement      → exprStmt
+               | forStmt
+               | ifStmt
+               | printStmt
+               | whileStmt
+               | block ;
+
+whileStmt      → "while" "(" expression ")" statement ;
+
+forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                 expression? ";"
+                 expression? ")" statement ;
+
+ifStmt         → "if" "(" expression ")" statement
+               ( "else" statement )? ;
+```
+
+### Logical operators
+The _and_ and _or_ operators are different from other binary operators in that they can **short-circuit** (this is a semantic concern, not a syntax one). If, after evaluating the left operand, we know what the result of the logical expression must be, we don't evaluate the right operand. 
+```
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment
+               | logic_or ;
+logic_or       → logic_and ( "or" logic_and )* ;
+logic_and      → equality ( "and" equality )
+```
+Since Lox is dynamically types, we allow operands of any type and use truthiness to determine what each operand represents. We do something similar for the return. Instead of promising to return a boolean, a logic operator returns a value with the _appropriate truthiness_ (the results of the operands).
+```
+print "hi" or 2; // "hi".
+print nil or "yes"; // "yes".
+```
+
+### For loop
+Clauses:
+1 - Initializer: It can be an expression statement or a variable declaration, and it is executed once before everything else. If it is a declaration, the variable is scoped to the rest of the for loop.
+2 - Condition: This expression is evaluated once at the start of each iteration.
+3 - Increment: It is an arbitrary expression that does some work at the end of each iteration. Its result is discarded, so it must have a side effect to be useful.
+
+None of the previous things do anything we couldn't implement with the statements we already have. In other words, a for loop is just a more pleasant way of writing common code patterns. These kind of features are called **syntactic sugar**.
+```
+//Equivalent:
+for (var i = 0; i < 10; i = i + 1) print i;
+
+{
+  var i = 0;
+  while (i < 10) {
+    print i;
+    i = i + 1;
+  }
+}
+```
+
