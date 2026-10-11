@@ -4,7 +4,6 @@ import java.util.List;
 
 abstract class Expr {
     interface Visitor<R> {
-        R visitVariableExpr(Variable variable);
         R visitAssignExpr(Assign expr);
         R visitTernaryExpr(Ternary expr);
         R visitBinaryExpr(Binary expr);
@@ -12,8 +11,8 @@ abstract class Expr {
         R visitLiteralExpr(Literal expr);
         R visitLogicalExpr(Logical expr);
         R visitUnaryExpr(Unary expr);
+        R visitVariableExpr(Variable expr);
     }
-
     static class Assign extends Expr {
         Assign(Token name, Expr value) {
             this.name = name;
@@ -28,7 +27,6 @@ abstract class Expr {
         final Token name;
         final Expr value;
     }
-
     static class Ternary extends Expr {
         Ternary(Expr left, Token firstOperator, Expr middle, Token secondOperator, Expr right) {
             this.left = left;
@@ -49,7 +47,6 @@ abstract class Expr {
         final Token secondOperator;
         final Expr right;
     }
-
     static class Binary extends Expr {
         Binary(Expr left, Token operator, Expr right) {
             this.left = left;

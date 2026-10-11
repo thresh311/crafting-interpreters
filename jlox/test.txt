@@ -22,11 +22,21 @@ print "hola" + 1;
 print a = 2, b = false? 1 : 3 and 4;
 print a;
 
+print "Loop with break";
 var i = 0;
-while(i < 3) {
-i = i + 1;
-print i;
+while(i == 0) {
+    while(i < 3) {
+        i = i + 1;
+        print i;
+    if (true) {
+        break;
+    }
+    }
+    print "Outer loop";
 }
+
+while(true) break;
+
 
 print "Fibonacci:";
 var a = 0;

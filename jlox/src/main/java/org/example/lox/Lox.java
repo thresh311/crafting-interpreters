@@ -16,7 +16,7 @@ public class Lox {
 
     public static void main(String[] args) throws IOException {
 
-         if (args.length > 1) {
+        if (args.length > 1) {
             System.out.println("Usage: jlox [script]");
             System.exit(64);
         } else if (args.length == 1) {
@@ -37,10 +37,10 @@ public class Lox {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
-        for(;;) {
+        for (; ; ) {
             System.out.print("> ");
-            String line  = reader.readLine();
-            if(line == null) break;
+            String line = reader.readLine();
+            if (line == null) break;
             run(line);
             //Prevent program exit if user makes a mistake during interactive prompt
             hadError = false;
@@ -83,7 +83,6 @@ public class Lox {
                 "\n[line " + error.token.line + "]");
         hadRuntimeError = true;
     }
-
 
 
 }

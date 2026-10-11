@@ -5,6 +5,9 @@ import java.util.List;
 public class Interpreter implements Expr.Visitor<Object>,
         Stmt.Visitor<Void> {
 
+    private static class BreakStmtError extends RuntimeException {
+    }
+
     private Environment environment = new Environment();
 
     void interpret(List<Stmt> statements) {
@@ -70,7 +73,7 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitVarStmt(Stmt.Var stmt) {
-        if(stmt.initializer != null) {
+        if (stmt.initializer != null) {
             Object value = evaluate(stmt.initializer);
             environment.define(stmt.name.lexeme, value);
         } else {
@@ -81,10 +84,19 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while(isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
+        try {
+            while (isTruthy(evaluate(stmt.condition))) {
+                execute(stmt.body);
+            }
+        } catch (BreakStmtError ignored) {
         }
         return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        //Unwind the callstack - I am not sure if it is the best solution, but it should work
+        throw new BreakStmtError();
     }
 
     @Override
@@ -97,7 +109,7 @@ public class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Object visitTernaryExpr(Expr.Ternary expr) {
         Object left = evaluate(expr.left);
-        return isTruthy(left)? evaluate(expr.middle) : evaluate(expr.right);
+        return isTruthy(left) ? evaluate(expr.middle) : evaluate(expr.right);
     }
 
     @Override
@@ -166,7 +178,7 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Object visitGroupingExpr(Expr.Grouping expr) {
-        return evaluate(expr);
+        return evaluate(expr.expression);
 
     }
 

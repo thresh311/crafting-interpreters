@@ -13,6 +13,7 @@ public class Parser {
 
     private final List<Token> tokens;
     private int current = 0;
+    private int loopNestingDepth = 0;
 
     Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -54,7 +55,14 @@ public class Parser {
         consume(LEFT_PAREN, "Expect '(' after while");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition");
-        Stmt body = statement();
+
+        Stmt body;
+        try {
+            loopNestingDepth++;
+            body = statement();
+        } finally {
+            loopNestingDepth--;
+        }
 
         return new Stmt.While(condition, body);
     }
@@ -62,6 +70,9 @@ public class Parser {
     private Stmt statement() {
         if (match(FOR)) {
             return forStatement();
+        }
+        if(match(BREAK)) {
+            return breakStatement();
         }
         if (match(IF)) {
             return ifStatement();
@@ -77,6 +88,14 @@ public class Parser {
         }
 
         return expressionStatement();
+    }
+
+    private Stmt breakStatement() {
+        if(loopNestingDepth == 0 ) {
+            error(previous(), "Break statement must be inside a loop");
+        }
+        consume(SEMICOLON, "Expect ';' after break");
+        return new Stmt.Break();
     }
 
     private Stmt forStatement() {
@@ -105,7 +124,13 @@ public class Parser {
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses");
 
-        Stmt body = statement();
+        Stmt body;
+        try {
+            loopNestingDepth++;
+             body = statement();
+        } finally {
+            loopNestingDepth--;
+        }
 
         if (increment != null) {
             body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
