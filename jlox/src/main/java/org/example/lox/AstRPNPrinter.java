@@ -29,6 +29,11 @@ public class AstRPNPrinter implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitLogicalExpr(Expr.Logical expr) {
+        return postfix(expr.operator.lexeme, expr.left, expr.right);
+    }
+
+    @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         String op = expr.operator.lexeme;
         //Disambiguate polish notation
