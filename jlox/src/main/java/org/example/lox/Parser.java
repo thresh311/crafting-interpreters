@@ -181,8 +181,8 @@ public class Parser {
             Token equals = previous();
             Expr value = assignment();
 
-            if (expr instanceof Expr.Variable) {
-                Token name = ((Expr.Variable) expr).name;
+            if (expr instanceof Expr.Variable variable) {
+                Token name = variable.name;
                 return new Expr.Assign(name, value);
             }
 

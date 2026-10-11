@@ -19,7 +19,7 @@ print b;
 print c;
 
 print "hola" + 1;
-print a = 2, b = true? 1 : 3;
+print a = 2, b = false? 1 : 3 and 4;
 print a;
 
 var i = 0;
