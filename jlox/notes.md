@@ -145,7 +145,7 @@ print a; // "after".
 - What happens when we can't find variable in an environment? We could make it a syntax error, a runtime error or return a default value. 
   - In the case of Lox, we choose to make it a runtime error. Making it a syntax error would make defining recursive functions much more difficult.
   - _Using_ a variable is not the same as _referring_ to it. You can refer to a variable in a chunk of code without immediately evaluating it, for example, when it is located inside the body of a function.
-  - In Java, a program is a set of declarations which all come into being simultaneously. The implementation declares all of the names before looking at the bodies of any of the functions.
+  - In Java, a program is a set of declarations which all come into being simultaneously. The implementation declares all the names before looking at the bodies of any of the functions.
 ```
 fun isOdd(n) {
   if (n == 0) return false;
@@ -345,3 +345,29 @@ for (var i = 0; i < 10; i = i + 1) print i;
 }
 ```
 
+### Challenges
+
+3 - Unlike Lox, most other C-style languages also support break and continue statements inside loops. Add support for break statements.
+
+The syntax is a break keyword followed by a semicolon. It should be a syntax error to have a break statement appear outside of any enclosing loop. At runtime, a break statement causes execution to jump to the end of the nearest enclosing loop and proceeds from there. Note that the break may be nested inside other blocks and if statements that also need to be exited.
+
+```
+declaration   -> varDecl 
+                 | statement; 
+                 
+statement      → exprStmt
+               | forStmt
+               | ifStmt
+               | breakStmt //The check that it is located inside a loop is done by the parser, but not reflected in the CFG
+               | printStmt
+               | whileStmt
+               | block ;
+               
+breakStmt      -> "break"  ";";
+whileStmt      → "while" "(" expression ")" statement;
+forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                 expression? ";"
+                 expression? ")" statement ;
+ifStmt         → "if" "(" expression ")" statement
+               ( "else" statement )? ;
+```
