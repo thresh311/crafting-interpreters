@@ -145,7 +145,7 @@ print a; // "after".
 - What happens when we can't find variable in an environment? We could make it a syntax error, a runtime error or return a default value. 
   - In the case of Lox, we choose to make it a runtime error. Making it a syntax error would make defining recursive functions much more difficult.
   - _Using_ a variable is not the same as _referring_ to it. You can refer to a variable in a chunk of code without immediately evaluating it, for example, when it is located inside the body of a function.
-  - In Java, a program is a set of declarations which all come into being simultaneously. The implementation declares all of the names before looking at the bodies of any of the functions.
+  - In Java, a program is a set of declarations which all come into being simultaneously. The implementation declares all the names before looking at the bodies of any of the functions.
 ```
 fun isOdd(n) {
   if (n == 0) return false;
@@ -266,6 +266,22 @@ The way we implement scopes it through **environments**. As the interpreter walk
 
 **Shadowing:** When a local variable has the same name as a variable in an enclosing scope, the code inside the block looses access to the outer variable. 
 
+### Challenges
+
+What does the following program do? It prints 3. 
+```
+var a = 1;
+{
+var a = a + 2;
+print a; 
+}
+```
+What did you expect it to do? Is it what you think it should do? What does analogous code in other languages you are familiar with do? What do you think users will expect this to do?
+
+- I expected it to print 3. This happens because the initializer expression is evaluated, before declaring 'a' in the inner scope.
+- In Java, this produces an error because the left-hand operand gets evaluated first to produce a variable, which shadows the one in the outer scope, and then right-hand operand is evaluated. (Reference: https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.26)
+- In C, the program prints an unpredictable garbage value. The identifier enters scope immediately after its complete declarator, before its initializer is evaluated.
+
 ## Chapter 9 - Control flow
 
 ### Conditional execution
@@ -329,3 +345,29 @@ for (var i = 0; i < 10; i = i + 1) print i;
 }
 ```
 
+### Challenges
+
+3 - Unlike Lox, most other C-style languages also support break and continue statements inside loops. Add support for break statements.
+
+The syntax is a break keyword followed by a semicolon. It should be a syntax error to have a break statement appear outside of any enclosing loop. At runtime, a break statement causes execution to jump to the end of the nearest enclosing loop and proceeds from there. Note that the break may be nested inside other blocks and if statements that also need to be exited.
+
+```
+declaration   -> varDecl 
+                 | statement; 
+                 
+statement      → exprStmt
+               | forStmt
+               | ifStmt
+               | breakStmt //The check that it is located inside a loop is done by the parser, but not reflected in the CFG
+               | printStmt
+               | whileStmt
+               | block ;
+               
+breakStmt      -> "break"  ";";
+whileStmt      → "while" "(" expression ")" statement;
+forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                 expression? ";"
+                 expression? ")" statement ;
+ifStmt         → "if" "(" expression ")" statement
+               ( "else" statement )? ;
+```
