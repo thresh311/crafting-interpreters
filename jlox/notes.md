@@ -157,6 +157,7 @@ fun isEven(n) {
   return isOdd(n - 1);
 }
 ```
+- The upper limit of the number of arguments that can be passes to a function call is 255.
 
 ### Challenges
 1 - Allowing comparisons on types other than numbers could be useful. The operators might have a reasonable interpretation for strings. Even comparisons among mixed types, like 3 < "pancake" could be handy to enable things like ordered collections of heterogeneous types. Or it could simply lead to bugs and confusion.
@@ -370,4 +371,67 @@ forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
                  expression? ")" statement ;
 ifStmt         → "if" "(" expression ")" statement
                ( "else" statement )? ;
+```
+
+## Chapter 9
+
+### Function Calls
+
+Calls are typically to named functions. But **the name the of function** isn't actually part of the **call syntax**. The thing being called (the **callee**) can be any expression that evaluates to a function.
+```
+getCallback()();
+```
+This example has two call expressions. The first pair of parentheses has getCallback as its callee. The second pair has the entire _getCallback()_ expression as its callee.
+    - It is the **parentheses** following an expression that indicate a function call. Kinda like a post-fix operator.
+
+New Lox grammar:
+```
+unary          → ( "!" | "-" ) unary | call ;
+call           → primary ( "(" arguments? ")" )* ;
+arguments      → expression ( "," expression )* ;
+```
+To evaluate a function call, we first evaluate the callee expression and then the arguments in order and, only then we execute the call.
+    - Since evaluating an argument expression may have side effects, the order of processing matters. In our case, we do it from left to right.
+
+### Call errors
+- Wrong type: The callee must be something that can be called. We check that before trying to execute the call.
+- Mismatched arity: Each function has an amount of arguments that it expects, that is its _arity_.
+  - Statically typed languages check this at compile time.
+  - Dynamically typed languages are more flexible in their approach. JS discard extra arguments you pass, and it fills in missing parameters with **undefined**. Python raises a runtime error if the argument list size doesn't match the arity. 
+
+
+### Native functions
+These are functions that interpreter exposes to user code but that are implemented in the host language (in our case Java), **not in the language being implemented.** Sometimes these are called **primitives, external functions, or foreign functions.** They for part of the implementation's runtime, because they can be called when the user program is running.
+    - **Foreign function interface (FFI), native extension, native interface:** It's mechanism that allows user of the language to implement their own native functions.
+    - These functions are defined in the local scope, so the whole user program has access to them.
+
+Functions and variables in Lox live in the **namespace**, that means that they can collide. Because of this Lox is a "Lisp-1" language.
+    - Lisp-2 languages partition functions and variable into their own namespaces.
+
+### Function declaration
+Function declarations, like variables, bind a new name. That means they are allowed only in places where a declaration is permitted.
+```
+declaration    → funDecl
+               | varDecl
+               | statement ;
+funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
+parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+```
+A named function declaration isn’t really a **single primitive operation**. It’s syntactic sugar for two distinct steps: (1) creating a new function object, and (2) binding a new variable to it.
+
+### Calling a function
+
+### Return statements
+In Lox, the body of a function is a list of statements which don’t produce values, so we need dedicated syntax for emitting a result.
+```
+statement      → exprStmt
+               | forStmt
+               | ifStmt
+               | printStmt
+               | returnStmt
+               | whileStmt
+               | block ;
+
+returnStmt     → "return" expression? ";" ;
 ```
